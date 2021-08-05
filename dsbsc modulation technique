@@ -1,0 +1,66 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import butter,filtfilt
+import neurokit2 as nk 
+from scipy import signal
+
+def butter_lowpass_filter(data, cutoff, fs, order):
+    nyq = 0.5 * fs 
+    normal_cutoff = cutoff / nyq
+    # Get the filter coefficients 
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    y = filtfilt(b, a, data)
+    return y
+
+
+t=np.linspace(0,10,5000)
+m=1*np.sin(2*np.pi*0.1*t)
+plt.subplot(331)
+plt.title("time domain of message signal")
+plt.plot(m)
+plt.show()
+mf=np.fft.fft(m)
+plt.subplot(332)
+plt.title("frequency domain of message signal")
+plt.stem(mf,use_line_collection=True)
+plt.show()
+c=10*np.cos(2*np.pi*10000*t)
+plt.subplot(333)
+plt.title("time domain of carrier signal")
+plt.plot(c)
+plt.show()
+cf=np.fft.fft(c)
+plt.subplot(334)
+plt.title("frequency domain of carrier signal")
+plt.stem(cf,use_line_collection=True)
+plt.show()
+u=m*c
+plt.subplot(335)
+plt.title("time domain of modulated signal")
+plt.plot(u)
+plt.show()
+uf=np.fft.fft(u)
+
+angle=np.angle(uf)
+noise =0.5*np.cos(9*2*np.pi*t) + 1.5*np.sin(12.0*2*np.pi*t)
+plt.subplot(336)
+plt.title("noise")
+plt.plot(noise)
+plt.show()
+data = u + noise
+plt.subplot(337)
+plt.title("noise +  signal")
+plt.plot(data)
+plt.show()
+# demodulation
+cs=np.cos(2*np.pi*10000*t)
+d=data*cs
+ys = butter_lowpass_filter(d,0.1,100,2)
+plt.subplot(338)
+plt.title("time domain of demodulated signal")
+plt.plot(d)
+plt.show()
+plt.subplot(339)
+plt.title("time domain of demodulated signal")
+plt.plot(ys)
+plt.show()
